@@ -19,7 +19,7 @@ def register_handlers_registry(dp: Dispatcher):
 
 async def registry_start(message: types.Message, state: FSMContext):
     await state.finish()
-    await message.answer('Введите название компании/Услуги')
+    await message.answer('Введите название компании/услуги')
     await OrderRegistry.waiting_for_company_name.set()
 
 
@@ -39,7 +39,7 @@ async def name_confirmation(message: types.Message, state: FSMContext):
         return
     if message.text.lower() == "изменить":
         await message.answer(
-            'Введите название компании/Услуги',
+            'Введите название компании/услуги',
             reply_markup=types.ReplyKeyboardRemove()
         )
         await OrderRegistry.waiting_for_company_name.set()

@@ -5,7 +5,7 @@ from aiogram.dispatcher import Dispatcher, FSMContext
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 
 from bot.registry import register_handlers_registry
-
+from bot.feedback import register_handlers_feedback
 
 TOKEN = os.getenv('TOKEN')
 bot = Bot(token=TOKEN)
@@ -15,6 +15,7 @@ dp = Dispatcher(bot, storage=MemoryStorage())
 def init_handlers():
     register_handlers_common(dp=dp)
     register_handlers_registry(dp=dp)
+    register_handlers_feedback(dp=dp)
 
 
 def register_handlers_common(dp: Dispatcher):
