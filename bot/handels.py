@@ -1,20 +1,33 @@
-from aiogram import Bot, types
-from aiogram.dispatcher import Dispatcher
 import os
+
+from aiogram import Bot, types
+from aiogram.dispatcher import Dispatcher, FSMContext
+from aiogram.contrib.fsm_storage.memory import MemoryStorage
+
+from bot.registry import register_handlers_registry
+
 
 TOKEN = os.getenv('TOKEN')
 bot = Bot(token=TOKEN)
-dp = Dispatcher(bot)
+dp = Dispatcher(bot, storage=MemoryStorage())
 
 
-@dp.message_handler(commands=['start', 'help'])
-async def send_welcome(msg: types.Message):
+def init_handlers():
+    register_handlers_common(dp=dp)
+    register_handlers_registry(dp=dp)
+
+
+def register_handlers_common(dp: Dispatcher):
+    dp.register_message_handler(cmd_start, commands="start", state="*")
+    dp.register_message_handler(cmd_start, commands="help", state="*")
+    dp.register_message_handler(cmd_cancel, commands="cancel", state="*")
+
+
+async def cmd_start(msg: types.Message, state: FSMContext):
+    await state.finish()
     await msg.answer(f'Я бот. Приятно познакомиться, {msg.from_user.first_name}')
 
 
-@dp.message_handler(content_types=['text'])
-async def get_text_messages(msg: types.Message):
-    if msg.text.lower() == 'привет':
-        await msg.answer('Привет!')
-    else:
-        await msg.answer('Не понимаю, что это значит.')
+async def cmd_cancel(message: types.Message, state: FSMContext):
+    await state.finish()
+    await message.answer("Действие отменено", reply_markup=types.ReplyKeyboardRemove())
