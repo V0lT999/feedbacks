@@ -2,6 +2,7 @@ from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 
+from db.psql import add_company
 
 CONFIRM_BUTTONS = ["подтвердить", "изменить"]
 
@@ -24,7 +25,7 @@ async def registry_start(message: types.Message, state: FSMContext):
 
 
 async def entering_name(message: types.Message, state: FSMContext):
-    await state.update_data(company_name=message.text.lower())
+    await state.update_data(company_name=message.text)
 
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
     keyboard.add(*CONFIRM_BUTTONS)
@@ -45,7 +46,9 @@ async def name_confirmation(message: types.Message, state: FSMContext):
         await OrderRegistry.waiting_for_company_name.set()
         return
     user_data = await state.get_data()
-    await message.answer(f"Компания {user_data['company_name']} зарегистрирована.\n"
+    if user_data['company_name']:
+        await add_company(user_data['company_name'])
+    await message.answer(f"Компания '{user_data['company_name']}' зарегистрирована.\n"
                          f"Чтобы узнать средний балл вашей компании, воспользуйтесь"
                          f"командой /score", reply_markup=types.ReplyKeyboardRemove())
     await state.finish()

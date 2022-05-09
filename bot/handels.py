@@ -1,13 +1,12 @@
-import os
-
 from aiogram import Bot, types
 from aiogram.dispatcher import Dispatcher, FSMContext
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 
+from config import TOKEN
+
 from bot.registry import register_handlers_registry
 from bot.feedback import register_handlers_feedback
 
-TOKEN = os.getenv('TOKEN')
 bot = Bot(token=TOKEN)
 dp = Dispatcher(bot, storage=MemoryStorage())
 

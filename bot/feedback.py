@@ -2,6 +2,7 @@ from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 
+from db.psql import get_score
 
 FEEDBACK_BUTTONS = ["продолжить",  "изменить"]
 
@@ -28,7 +29,7 @@ async def feedback_start(message: types.Message, state: FSMContext):
 
 
 async def company_name(message: types.Message, state: FSMContext):
-    company_name = message.text.lower()
+    company_name = message.text
     await state.update_data(feedback_company_name=company_name)
 
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -41,7 +42,7 @@ async def company_name(message: types.Message, state: FSMContext):
     )
 
 
-async def company_confirm(message: types.Message):
+async def company_confirm(message: types.Message, state: FSMContext):
     # TODO сделать проверку названия по базе
     if message.text.lower() not in FEEDBACK_BUTTONS:
         await message.answer("Пожалуйста, подтвердите название, используя клавиатуру ниже.")
@@ -49,6 +50,17 @@ async def company_confirm(message: types.Message):
     if message.text.lower() == "изменить":
         await message.answer(
             'Введите название компании/услуги',
+            reply_markup=types.ReplyKeyboardRemove()
+        )
+        await Feedback.waiting_for_company_name.set()
+        return
+    user_data = await state.get_data()
+    code, msg = await get_score(company_name=user_data['feedback_company_name'])
+    if code != 200:
+        await message.answer(
+            'Данное название компании/услуги не было найдено.'
+            'Вы можете попробовать ввести название еще раз,'
+            'или оставить отзыв на другую компанию/услугу',
             reply_markup=types.ReplyKeyboardRemove()
         )
         await Feedback.waiting_for_company_name.set()
