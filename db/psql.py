@@ -32,8 +32,8 @@ async def add_company(company_name: str = None):
 
 
 async def get_score(company_name: str = None):
-    logger.info(f'Хотим получить score из базы.'
-                 f'Company_name: "{company_name}"')
+    logger.info(f'Хотим получить score из базы. '
+                f'Company_name: "{company_name}"')
 
     if not company_name:
         return 400, 'Не правильное использование команды'
@@ -48,6 +48,32 @@ async def get_score(company_name: str = None):
             return 404, 'Компания не найдена'
 
         return 200, result[0]
+
+
+async def update_score(company_name: str = None, score: float = None):
+    logger.info(f'Обновляем score для "{company_name}"')
+
+    if not company_name:
+        return 400, 'Не указана компания'
+
+    if not score:
+        return 400, 'Не указана оценка'
+
+    code, current_score = await get_score(company_name=company_name)
+
+    if code != 200:
+        return code, current_score
+
+    new_score = "{0:.2f}".format((current_score + score) / 2)
+
+    with conn.cursor() as cursor:
+        update = f"UPDATE score SET score = {new_score} " \
+                 f"WHERE company_name = '{company_name}'"
+        cursor.execute(update)
+        conn.commit()
+        logger.info(f'Обновили score для "{company_name}"')
+
+    return 200
 
 
 if __name__ == "__main__":

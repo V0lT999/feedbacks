@@ -2,9 +2,15 @@ from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 
-from db.psql import get_score
+from db.psql import get_score, update_score
+
+from analyzer.sentiment.tokenization import RegexTokenizer
+from analyzer.sentiment.models import FastTextSocialNetworkModel
 
 FEEDBACK_BUTTONS = ["продолжить",  "изменить"]
+
+tokenizer = RegexTokenizer()
+model = FastTextSocialNetworkModel(tokenizer=tokenizer)
 
 
 class Feedback(StatesGroup):
@@ -99,12 +105,17 @@ async def feedback_confirm(message: types.Message, state: FSMContext):
         return
     user_data = await state.get_data()
     feedback_msg = user_data.get('feedback')
-    # TODO передать отзыв в модельку
+    score = model.predict([feedback_msg], k=1)
     feedback_company_name = user_data.get('feedback_company_name')
+
+    await update_score(
+        company_name=feedback_company_name,
+        score=score
+    )
 
     await message.answer(
         f'Спасибо, что оставили отзыв для "{feedback_company_name}"! '
-        f'Приходите еще!',
+        f'Оценка отзыва: {score}. Приходите еще!',
         reply_markup=types.ReplyKeyboardRemove()
     )
     await state.finish()
