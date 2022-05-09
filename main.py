@@ -19,6 +19,7 @@ async def set_commands(bot):
         BotCommand(command="/help", description="Помощь"),
         BotCommand(command="/registry", description="Зарегистрировать компанию/услугу"),
         BotCommand(command="/feedback", description="Оставить отзыв"),
+        BotCommand(command="/score", description="Узнать средний балл компании/услуги"),
         BotCommand(command="/cancel", description="Отменить текущее действие")
     ]
     await bot.set_my_commands(commands)

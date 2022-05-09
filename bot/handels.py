@@ -6,6 +6,7 @@ from config import TOKEN
 
 from bot.registry import register_handlers_registry
 from bot.feedback import register_handlers_feedback
+from bot.score import register_handlers_score
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher(bot, storage=MemoryStorage())
@@ -15,6 +16,7 @@ def init_handlers():
     register_handlers_common(dp=dp)
     register_handlers_registry(dp=dp)
     register_handlers_feedback(dp=dp)
+    register_handlers_score(dp=dp)
 
 
 def register_handlers_common(dp: Dispatcher):

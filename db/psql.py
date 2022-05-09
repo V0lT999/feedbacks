@@ -36,7 +36,7 @@ async def get_score(company_name: str = None):
                  f'Company_name: "{company_name}"')
 
     if not company_name:
-        return 400, 'BAD REQUEST'
+        return 400, 'Не правильное использование команды'
 
     with conn.cursor() as cursor:
         select = f"SELECT score FROM score WHERE company_name = '{company_name}'"
@@ -45,9 +45,9 @@ async def get_score(company_name: str = None):
         result = cursor.fetchone()
 
         if not result:
-            return 404, 'COMPANY NOT FOUND'
+            return 404, 'Компания не найдена'
 
-        return 200, result
+        return 200, result[0]
 
 
 if __name__ == "__main__":
